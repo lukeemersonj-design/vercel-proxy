@@ -1,15 +1,26 @@
-const httpProxy = require('http-proxy');
-const { createServer } = require('http');
+import fetch from "node-fetch";
 
-const proxy = httpProxy.createProxyServer({});
+export default async function handler(req, res) {
+  const url = "https://lol--lukeemersonj.replit.app" + req.url;
 
-const target = 'https://lol--lukeemersonj.replit.app';
+  try {
+    const response = await fetch(url, {
+      method: req.method,
+      headers: req.headers,
+      body: req.method !== "GET" && req.method !== "HEAD" ? req : null,
+    });
 
-createServer((req, res) => {
-  proxy.web(req, res, { target, changeOrigin: true }, err => {
-    res.writeHead(500, { 'Content-Type': 'text/plain' });
-    res.end('Proxy error');
-  });
-}).listen(3000);
+    res.status(response.status);
+    response.headers.forEach((value, key) => {
+      if (key.toLowerCase() !== "content-encoding") {
+        res.setHeader(key, value);
+      }
+    });
 
-console.log(`Proxy running to ${target}`);
+    const body = await response.arrayBuffer();
+    res.send(Buffer.from(body));
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Proxy error");
+  }
+}
