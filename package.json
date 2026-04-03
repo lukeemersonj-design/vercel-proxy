@@ -1,14 +1,9 @@
 {
-  "name": "my-vercel-app",
+  "name": "vercel-serverless-app",
   "version": "1.0.0",
-  "type": "module",
   "main": "index.js",
-  "scripts": {
-    "start": "node index.js"
-  },
   "dependencies": {
     "node-fetch": "^3.4.1",
-    "http-proxy": "^1.18.1",
-    "express": "^4.18.2"
+    "http-proxy": "^1.18.1"
   }
 }
