@@ -1,26 +1,23 @@
+import express from "express";
 import fetch from "node-fetch";
+import httpProxy from "http-proxy";
 
-export default async function handler(req, res) {
-  const url = "https://lol--lukeemersonj.replit.app" + req.url;
+const app = express();
+const proxy = httpProxy.createProxyServer({});
 
+app.get("/", async (req, res) => {
   try {
-    const response = await fetch(url, {
-      method: req.method,
-      headers: req.headers,
-      body: req.method !== "GET" && req.method !== "HEAD" ? req : null,
-    });
-
-    res.status(response.status);
-    response.headers.forEach((value, key) => {
-      if (key.toLowerCase() !== "content-encoding") {
-        res.setHeader(key, value);
-      }
-    });
-
-    const body = await response.arrayBuffer();
-    res.send(Buffer.from(body));
+    const response = await fetch("https://jsonplaceholder.typicode.com/todos/1");
+    const data = await response.json();
+    res.json(data);
   } catch (err) {
-    console.error(err);
-    res.status(500).send("Proxy error");
+    res.status(500).json({ error: err.message });
   }
-}
+});
+
+app.all("/proxy/*", (req, res) => {
+  const target = req.url.replace("/proxy/", "");
+  proxy.web(req, res, { target: `https://${target}`, changeOrigin: true });
+});
+
+export default app;
